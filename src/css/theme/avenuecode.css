@@ -166,7 +166,8 @@ body {
   .reveal.center .slides section {
     min-height: 100%; }
     .reveal.center .slides section img.logo {
-      max-height: 250px; }
+      max-height: 250px;
+      border: 0; }
     .reveal.center .slides section em {
       color: #f90 !important;
       font-style: normal; }

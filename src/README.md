@@ -20,17 +20,23 @@ You should just edit the source file at src/README.md - the one which stars with
 
 ## Agenda
 
- - The template
-  - Installing
-  - Working
-  - Deploying
- - Your talk
-  - Organization
-  - Content requirements
-  - Communication requirements
-  - The DONT's
-  - Tips
-  - If you are recording
+ - Tricks
+  - Memory leaks
+  - Events binding
+  - Overwhelming the DOM
+  - Router controller
+  - Bloated code
+  - Tight coupling
+  - The jQuery Way
+  - Callback hell
+  - Slow tests
+ - Treats
+  - Marionette.js
+  - Controllers
+  - Pub/sub
+  - Sinon.JS
+  - Separating modules
+  - Deferring
 
 ----
 

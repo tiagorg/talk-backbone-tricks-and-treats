@@ -2,11 +2,11 @@
 
 WARNING!! DON'T EDIT THE FILE README.md on the root of the project, that one is a GENERATED FILE!
 
-You should just edit the source file at src/README.md - the one which stars with ## Talk template
+You should just edit the source file at src/README.md - the one which stars with ## Backbone.js tricks or treats
 
 -->
 
-## Talk template
+## Backbone.js tricks or treats
 
 <img src="img/cover.jpg" class="logo" />
 
@@ -14,23 +14,29 @@ Tiago Garcia @ [Avenue Code](http://www.avenuecode.com)
 
 *tgarcia@avenuecode.com*
 
-Feb 11th, 2014
+Mar 25th, 2014
 
 ---
 
 ## Agenda
 
- - The template
-  - Installing
-  - Working
-  - Deploying
- - Your talk
-  - Organization
-  - Content requirements
-  - Communication requirements
-  - The DONT's
-  - Tips
-  - If you are recording
+ - Tricks
+  - Memory leaks
+  - Events binding
+  - Overwhelming the DOM
+  - Router controller
+  - Bloated code
+  - Tight coupling
+  - The jQuery Way
+  - Callback hell
+  - Slow tests
+ - Treats
+  - Marionette.js
+  - Controllers
+  - Pub/sub
+  - Sinon.JS
+  - Separating modules
+  - Deferring
 
 ----
 
