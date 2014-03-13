@@ -168,6 +168,15 @@ body {
     .reveal.center .slides section img.logo {
       max-height: 250px;
       border: 0; }
+    .reveal.center .slides section ul.full {
+      width: 100%; }
+    .reveal.center .slides section img.marionette {
+      max-height: 250px;
+      border: 0;
+      background: none;
+      position: absolute;
+      right: 0;
+      box-shadow: none; }
     .reveal.center .slides section em {
       color: #f90 !important;
       font-style: normal; }

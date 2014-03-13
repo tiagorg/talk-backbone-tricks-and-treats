@@ -20,94 +20,107 @@ You should just edit the source file at src/README.md - the one which stars with
 
 ## Agenda
 
- - Tricks
-  - Memory leaks
-  - Events binding
-  - Overwhelming the DOM
-  - Router controller
-  - Bloated code
-  - Tight coupling
-  - The jQuery Way
-  - Callback hell
-  - Slow tests
- - Treats
-  - Marionette.js
-  - Controllers
-  - Pub/sub
-  - Sinon.JS
-  - Separating modules
-  - Deferring
+ - The jQuery Way
+ - Memory leaks
+   - Manual approach
+   - Marionette.js
+ - View management
+   - Nesting views
+ - Bloated code
+   - Application and Modules
+   - Router vs Controller
+ - Tight coupling
+   - Pub/sub
 
 ----
 
 ## Agenda
 
- - Contributing
- - Learn more
- - Conclusion
- - Assignment
+ - Overwhelming the DOM
+   - Fragment
+ - Callback hell
+   - Promises and deferring
+ - Data binding
+   - Epoxy.js
+ - Slow tests
+   - Sinon.JS
 
 ---
 
 ## Prerequisites
 
-- Markdown
-- Reveal.js
-- Grunt
+- Backbone.js
+- Design patterns for large-scale javascript
+- Jasmine
 
 ---
 
-## The template
+## The jQuery Way
 
-1. The Avenue Code talk template is a responsive, web-based talk template.
-1. This template is based on [Reveal.JS](http://lab.hakim.se/reveal-js).
-1. All you need to do is to write your content in [Markdown](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet).
-1. There are some [Grunt](http://gruntjs.com) jobs to automatize the build process.
-1. It has *automatic code highlighting*, guessing the programming language you used.
-1. Once it is described in *README.md*, the talk contents will also be available as the repository description which is a common format for tutorials.
+- Backbone depends on jQuery, however it must not be abused.
+- Developers coming from strong jQuery background insist on *jQuerizing*, while Backbone provides structure to avoid that:
+  - AJAX belongs to the Model and *SHOULD NOT* be coded like *$.ajax()*.
+  - DOM events binding belongs to the View and *SHOULD NOT* be coded like *$(el).on('click', ...)*.
+- This is a common scenario in code migrations to Backbone, but simple to fix. Just have Model and View do their work.
+- Follow [Step by step from jQuery to Backbone](https://github.com/kjbekkelund/writings/blob/master/published/understanding-backbone.md) to better understand this process.
+
+---
+
+## Memory leaks
+
+- Backbone leaves much of the code structure for to the developer to define and implement.
+- Bad designs easily lead to memory leaks.
+```javascript
+  var MyView = Backbone.View.extend({
+    initialize: function() {
+      this.model.on('change', this.render, this);
+    },
+
+    render: function() {
+      alert('Rendering the view');
+    }
+  });
+```
+- If you instantiate this view twice, the 1st will never be Garbage Collected, as the model still has a reference for it.
+- This can cause *side-effects*: alert box will appear twice.
 
 ----
 
-## Setting up your repo
+## Manual approach
 
-1. Sign in on GitHub
-1. Fork the repository <https://github.com/acbr/talk-template>
-1. Rename it to match your talk name (ex: *talk-design-patterns*)
-1. Clone this repository
-1. Navigate to its folder on the terminal
+- To fix it, we just need a method to *unbind* the view:
+```javascript
+    close: function() {
+      // unbind the events that this view is listening to
+      this.stopListening();
+    }
+```
+- However, we must remember to manually call this method whenever we destroy a view.
+- A good practice is to create a Manager for the current view:
+```javascript
+    showView: function(view) {
+      if (this.currentView) {
+        this.currentView.close();
+      }
+      this.currentView = view;
+      this.currentView.render();
+      $("#mainContent").html(this.currentView.el);
+    }
+```
 
 ----
 
-## Building and running
+## Marionette.js
 
-1. Install [Node.js](http://nodejs.org/)
-1. Install [Grunt](http://gruntjs.com/getting-started#installing-the-cli)
-1. On the repo folder, install the npm dependencies
-```sh
-$ npm install
-```
-1. Build it, serve it and monitor source files for changes
-```sh
-$ grunt
-```
-1. Open <http://localhost:8000> to view your talk
+<img src="img/marionette.png" class="marionette" />
 
-----
-
-## Working
-
-1. Open up *config.json* and fill your talk data such as title, author, email, date and description.
-  - That is the *ONLY FILE* you should edit on the project root!
-1. Any further change you will do is inside the *src* folder, such as:
-  - *src/README.md* to write your talk content in *Markdown*
-  - *src/index.html* to modify the HTML
-1. Grunt will generate files on the project root as you change *src*.
-1. In order to separate slides horizontally, use 3 dashes (---).
-1. In order to separate slides vertically, use 4 dashes (----).
-1. In order to *call out attention*, put an asterisk around your text:
-```
-In order to *call out attention*, ...
-```
+<ul class="full">
+  <li>A Backbone.js composite application library to <br/>provide structure for large-scale Javascript.</li>
+  <li>Includes good practices and design & <br/>implementation patterns.</li>
+  <li>Reduces code boilerplate.</li>
+  <li>Provides a modular architecture framework <br/>with a Pub/Sub implementation.</li>
+  <li>And much more...</li>
+</ul>
 
 ----
 
@@ -225,9 +238,10 @@ git push origin my-new-feature
 
 ## Learn more
 
-1. [Markdown Cheatsheet](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet)
-1. [Reveal.JS](https://github.com/hakimel/reveal.js)
-1. [Grunt](http://gruntjs.com)
+1. [Structuring jQuery with Backbone.js](http://www.codemag.com/Article/1312061)
+1. [Step by step from jQuery to Backbone](https://github.com/kjbekkelund/writings/blob/master/published/understanding-backbone.md)
+1. [Zombies! RUN! (Managing Page Transitions In Backbone Apps)](http://lostechies.com/derickbailey/2011/09/15/zombies-run-managing-page-transitions-in-backbone-apps/)
+1. [Developing Backbone.js Applications](http://addyosmani.github.io/backbone-fundamentals)
 
 ---
 

@@ -65,6 +65,19 @@ $heading1TextShadow: 0 1px 0 #ccc, 0 2px 0 #c9c9c9, 0 3px 0 #bbb, 0 4px 0 #b9b9b
         border: 0;
       }
 
+      ul.full {
+        width: 100%;
+      }
+
+      img.marionette {
+        max-height: 250px;
+        border: 0;
+        background: none;
+        position: absolute;
+        right: 0;
+        box-shadow: none;
+      }
+
       em {
         color: #f90 !important;
         font-style: normal;
