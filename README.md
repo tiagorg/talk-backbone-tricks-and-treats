@@ -23,8 +23,7 @@ Mar 25th, 2014
  - The jQuery Way
  - Views and Memory leaks
  - Overwhelming the DOM
- - View management
-   - Nesting views
+ - Nesting views
  - Bloated code
    - Application and Modules
    - Router vs Controller
@@ -34,7 +33,6 @@ Mar 25th, 2014
 ----
 
 ## Agenda
-
 
  - Callback hell
    - Promises and deferring
@@ -55,11 +53,11 @@ Mar 25th, 2014
 
 ## The jQuery Way
 
-- Backbone depends on jQuery, however it must not be abused.
+- Backbone depends on jQuery, but it shouldn't mean abusing.
 - Developers coming from strong jQuery background insist on *jQuerizing*, while Backbone provides structure to avoid that:
-  - AJAX belongs to the Model and *SHOULD NOT* be coded like *$.ajax()*.
-  - DOM events binding belongs to the View and *SHOULD NOT* be coded like *$(el).on('click', ...)*.
-- This is a common scenario in code migrations to Backbone, but simple to fix. Just have Model and View do their work.
+  - AJAX belongs to the Model and *SHOULD NOT* be coded like *`$.ajax()`*.
+  - DOM events binding belongs to the View and *SHOULD NOT* be coded like *`$(el).click(...)`*.
+- This is a common scenario in code migrations to Backbone, but simple to fix. Just have the Models and Views to do their work.
 - Follow [Step by step from jQuery to Backbone](https://github.com/kjbekkelund/writings/blob/master/published/understanding-backbone.md) to better understand this process.
 
 ---
@@ -71,7 +69,7 @@ Mar 25th, 2014
 ```javascript
   var MyView = Backbone.View.extend({
     initialize: function() {
-      this.model.on('change', this.render, this);
+      this.model.on('change', this.render, this); // Data binding
     },
 
     render: function() {
@@ -94,7 +92,7 @@ Mar 25th, 2014
     }
 ```
 - However, we must remember to manually call this method whenever we destroy a View.
-- A good practice is a Manager to keep the current View:
+- Good practice: use a *Manager* to maintain the current View:
 ```javascript
     showView: function(view) {
       if (this.currentView) {
@@ -122,7 +120,7 @@ Mar 25th, 2014
 
 ----
 
-## Marionette.ItemView
+## Marionette's ItemView
 
 - *Marionette.ItemView* extends *Backbone.View* and automates the rendering of a single item (Model or Collection).
 - It implements *render()* for you, applying a given *template* to a Model/Collection.
@@ -142,7 +140,7 @@ Mar 25th, 2014
 
 ----
 
-## Marionette.Region
+## Marionette's Region
 
 - *Marionette.Region* is a Views container and manager.
 - It manages their lifecycles and proper display on a DOM element and closing (no more Zombie Views).
@@ -152,10 +150,10 @@ Mar 25th, 2014
     });
 
     var view1 = new MyView({ /* ... */ });
-    myRegion.show(view1);
+    myRegion.show(view1); // myRegion yields view and populates the DOM
 
     var view2 = new MyView({ /* ... */ });
-    myRegion.show(view2);
+    myRegion.show(view2); // myRegion yields view and populates the DOM
 ```
 
 ---
@@ -170,36 +168,71 @@ Mar 25th, 2014
           var view = new MyView({
             model: item
           });
-          this.$el.append(view.render().el);
+
+          this.$el.append(view.render().el); // populating the DOM
         }, this);
-        return this;
       }
     });
 ```
-- If the Collection has N items, this code makes N operations on the DOM, which is *expensive*. Imagine N = 1000.
+- If the Collection has N items, this code makes N operations on the DOM, which is *expensive*. Imagine N = 1000?
 
 
 ----
 
 ## Manual approach
 
-- A better approach is to append to a *document fragment* instead, and just add the fragment once to the DOM:
+- A better approach is to append to a *document fragment* instead, and just add the fragment *once* to the DOM:
 ```javascript
     var CollectionView = Backbone.View.extend({
       render: function() {
         var fragment = document.createDocumentFragment();
+
         _.each(this.collection.models, function(item) {
           var view = new MyView({
             model: item
           });
-          fragment.appendChild(view.render().el);
+
+          fragment.appendChild(view.render().el); // appending to fragment
         }, this);
 
-        this.$el.html(fragment);
-        return this;
+        this.$el.html(fragment); // populating the DOM
       }
     });
 ```
+
+----
+
+## Marionette's CollectionView
+
+- *Marionette.CollectionView* renders a Collection and uses a *Marionette.ItemView* for each item renderization. It doesn't need a template for itself.
+- Uses a *document fragment* internally.
+```javascript
+  var MyView = Marionette.CollectionView.extend({
+    itemView: MyView
+
+    // No render() anymore!! :)
+  });
+```
+
+----
+
+## Marionette's CompositeView
+
+- *Marionette.CompositeView* is similar to a *Marionette.CollectionView* but also takes a template for itself. Designed for parent-child relationships.
+- Useful to build hierarchical and recursive structures like *trees*.
+```javascript
+  var MyView = Marionette.CompositeView.extend({
+    itemView: MyView,
+    template: "#node-template", // Template for the parent
+    itemViewContainer: "tbody" // Where to put the itemView instances into
+
+    // No render() anymore!! :)
+  });
+```
+
+---
+
+## Nesting views
 
 ---
 
