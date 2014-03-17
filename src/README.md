@@ -24,9 +24,9 @@ You should just edit the source file at src/README.md - the one which stars with
  - Views and Memory leaks
  - Overwhelming the DOM
  - Nesting views
+ - Router vs Controller
  - Bloated code
    - Application and Modules
-   - Router vs Controller
  - Tight coupling
    - Pub/sub
 
@@ -87,7 +87,7 @@ You should just edit the source file at src/README.md - the one which stars with
 - To fix it, we just need a method to *unbind* the View:
 ```javascript
     close: function() {
-      // unbind the events that this view is listening to
+      // Unbind the events that this view is listening to
       this.stopListening();
     }
 ```
@@ -169,7 +169,7 @@ You should just edit the source file at src/README.md - the one which stars with
             model: item
           });
 
-          this.$el.append(view.render().el); // populating the DOM
+          this.$el.append(view.render().el); // Populating the DOM
         }, this);
       }
     });
@@ -192,10 +192,10 @@ You should just edit the source file at src/README.md - the one which stars with
             model: item
           });
 
-          fragment.appendChild(view.render().el); // appending to fragment
+          fragment.appendChild(view.render().el); // Appending to fragment
         }, this);
 
-        this.$el.html(fragment); // populating the DOM
+        this.$el.html(fragment); // Populating the DOM
       }
     });
 ```
@@ -233,6 +233,91 @@ You should just edit the source file at src/README.md - the one which stars with
 ---
 
 ## Nesting views
+
+- Usual view nesting:
+```javascript
+  var OuterView = Backbone.View.extend({
+    render: function() {
+      this.$el.append(template);
+
+      // Inner view
+      this.innerView = new InnerView();
+      this.innerView.render();
+      this.$('#some-container').append(this.innerView.$el);
+    }
+  });
+```
+- Every call to *render()* will instantiate again the inner view, and rebind the events.
+- The previous inner views have potential to be Zombies.
+- Inner view is manually created, but never manually disposed.
+
+----
+
+## Manual approach
+
+- A better approach to improve performance & avoid Zombies.
+```javascript
+  var OuterView = Backbone.View.extend({
+    initialize: function() {
+      this.inner = new InnerView(); // Instantiated just once
+    },
+
+    render: function() {
+      this.$el.append(template);
+      this.$('#some-container').append(this.innerView.el);
+      this.inner.render();
+    },
+
+    // Needs to be manually invoked before removing
+    close: function() {
+      this.inner.remove();
+    }
+  });
+```
+
+----
+
+## Manual approach
+
+- A better approach to improve performance & avoid Zombies.
+```javascript
+  var InnerView = Backbone.View.extend({
+    render: function() {
+      this.$el.html(template);
+
+      // Needed to bind events to new DOM
+      this.delegateEvents();
+    }
+  });
+```
+- This still can be a mess for too many inner views.
+
+----
+
+## Marionette's Layout
+
+- *Marionette.Layout* extends from *Marionette.ItemView* but provides embedded *Marionette.Region*s which can be populated with other views.
+```javascript
+  var OuterView = Backbone.Marionette.Layout.extend({
+    template: "#outer-template",
+
+    regions: {
+      inner: "#inner-template"
+    }
+  });
+
+  var outer = new OuterView();
+  outer.render();
+
+  var inner = new InnerView();
+  outer.inner.show(inner);
+```
+
+---
+
+## Router vs Controller
+
+- Routers are commonly used as controllers
 
 ---
 
