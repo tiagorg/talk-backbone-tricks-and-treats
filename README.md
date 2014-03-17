@@ -24,9 +24,8 @@ Mar 25th, 2014
  - Views and Memory leaks
  - Overwhelming the DOM
  - Nesting views
+ - Application and Modules
  - Router vs Controller
- - Bloated code
-   - Application and Modules
  - Tight coupling
    - Pub/sub
 
@@ -317,7 +316,37 @@ Mar 25th, 2014
 
 ## Router vs Controller
 
-- Routers are commonly used as controllers
+- Routers commonly violate the *Single Responsibility Principle* (SRP) when used to:
+  - instantiate and manipulate views
+  - load models and collections
+  - coordinate modules
+- A Router's main (and only) purpose is to define routes and delegate the flow to different parts of the application.
+- According to MVC, *Controllers* should deal with such things as Models, Collections, Views and Modules.
+- Even though Backbone.js is MV*, there is nothing wrong on creating Controllers just as any other JS module.
+
+----
+
+## Router vs Controller
+
+- One approach is to delegate the routes to controllers:
+```javascript
+  var MyRouter = Backbone.Router.extend({
+    routes: {
+      "": "home",
+      "home": "home",
+      "product/:id": "viewProduct",
+    },
+
+    home: function() {
+      AppController.home();
+    },
+
+    viewProduct: function(productId) {
+      ProductController.viewProduct(productId);
+    }
+  });
+```
+- Derick Bailey factors out even those functions: [Reducing Backbone Routers To Nothing More Than Configuration](http://lostechies.com/derickbailey/2012/01/02/reducing-backbone-routers-to-nothing-more-than-configuration/)
 
 ---
 
@@ -335,6 +364,7 @@ Mar 25th, 2014
 1. [Zombies! RUN! (Managing Page Transitions In Backbone Apps)](http://lostechies.com/derickbailey/2011/09/15/zombies-run-managing-page-transitions-in-backbone-apps/)
 1. [Developing Backbone.js Applications](http://addyosmani.github.io/backbone-fundamentals)
 1. [Marionette.js](https://github.com/marionettejs/backbone.marionette)
+1. [Reducing Backbone Routers To Nothing More Than Configuration](http://lostechies.com/derickbailey/2012/01/02/reducing-backbone-routers-to-nothing-more-than-configuration/)
 
 ---
 
