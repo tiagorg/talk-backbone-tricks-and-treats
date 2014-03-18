@@ -37,7 +37,7 @@ You should just edit the source file at src/README.md - the one which stars with
  - Data binding
    - Epoxy.js
  - Mocking AJAX
-   - Sinon.js
+   - Sinon.JS
 
 ---
 
@@ -503,7 +503,7 @@ You should just edit the source file at src/README.md - the one which stars with
 
 ```javascript
   var bindModel = new Backbone.Model({
-    name: 'Tiago Garcia'
+    name: 'Lando Calrissian'
   });
 
   var BindingView = Backbone.Epoxy.View.extend({
@@ -531,9 +531,34 @@ You should just edit the source file at src/README.md - the one which stars with
 
 ## Mocking AJAX
 
+- How to unit test Backbone Models that consume data from a server?
+- If we really use a server, this might get slow depending on the number of requests. And the server must work at all times, cause if it isn't working the tests will probably fail.
+- If we use mocks, we don't depend on a server, however we need some code to feed the Model with mocks and hence we are not testing it perfectly (just like in Production).
+- How does it sound to replace the browser AJAX with a fake AJAX powered with mocks?
+
 ----
 
-## Sinon.js
+## Sinon.JS
+
+- Provides test spies, stubs and mocks for JavaScript.
+- Works with any unit testing framework and also standalone.
+```javascript
+  var server = sinon.fakeServer.create();
+  server.autoRespond = true;
+
+  server.respondWith(
+    'GET',
+    '/character/422',
+    [
+      200,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify({
+        'id': 422,
+        'title': 'Lando Calrissian'
+      })
+    ]
+  );
+```
 
 ---
 
@@ -541,7 +566,7 @@ You should just edit the source file at src/README.md - the one which stars with
 
 - Backbone.js is not a complete application structure framework, thus many details are left for the developer.
 - In order to avoid problems and keep up with the good practices, frameworks as Marionette.js and Epoxy.js are very handy.
-- Mocking AJAX with Sinon.js provides a solid way to test Backbone.js integration.
+- Mocking AJAX with Sinon.JS provides a solid way to test Backbone.js integration.
 
 ---
 
@@ -554,6 +579,7 @@ You should just edit the source file at src/README.md - the one which stars with
 1. [Marionette.js](https://github.com/marionettejs/backbone.marionette)
 1. [Reducing Backbone Routers To Nothing More Than Configuration](http://lostechies.com/derickbailey/2012/01/02/reducing-backbone-routers-to-nothing-more-than-configuration/)
 1. [Epoxy.js](http://epoxyjs.org)
+1. [Sinon.JS](http://sinonjs.org)
 
 ---
 
