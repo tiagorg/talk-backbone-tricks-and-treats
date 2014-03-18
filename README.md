@@ -112,7 +112,7 @@ Mar 25th, 2014
       }
       this.currentView = view;
       this.currentView.render();
-      $("#mainContent").html(this.currentView.el);
+      $('#mainContent').html(this.currentView.el);
     }
 ```
 
@@ -126,7 +126,7 @@ Mar 25th, 2014
 ```javascript
   var MyView = Marionette.ItemView.extend({
     template: '#my-ujs-template', // Underscore.js template
-    template: Handlebars.compile($("#my-hbs-template").html()), // Handlebars.js template
+    template: Handlebars.compile($('#my-hbs-template').html()), // Handlebars.js template
 
     initialize: function() {
       this.listenTo(this.model, 'change', this.render);
@@ -221,8 +221,8 @@ Mar 25th, 2014
 ```javascript
   var MyView = Marionette.CompositeView.extend({
     itemView: MyView,
-    template: "#node-template", // Template for the parent
-    itemViewContainer: "tbody" // Where to put the itemView instances into
+    template: '#node-template', // Template for the parent
+    itemViewContainer: 'tbody' // Where to put the itemView instances into
 
     // No render() anymore!! :)
   });
@@ -297,10 +297,10 @@ Mar 25th, 2014
 - *Marionette.Layout* extends from *Marionette.ItemView* but provides embedded *Marionette.Region*s which can be populated with other views.
 ```javascript
   var OuterView = Backbone.Marionette.Layout.extend({
-    template: "#outer-template",
+    template: '#outer-template',
 
     regions: {
-      inner: "#inner-template"
+      inner: '#inner-template'
     }
   });
 
@@ -340,7 +340,7 @@ Mar 25th, 2014
 - Can define, access, start and stop *Marionette.Modules*:
 ```javascript
   MyApp.module('myModule', function() { // Defining
-    var privateData = "I'm private"; // Private member
+    var privateData = 'I am private'; // Private member
 
     this.publicFunction = function() { // Public member
       return privateData;
@@ -370,27 +370,43 @@ Mar 25th, 2014
 
 ----
 
-## Router vs Controller
+## Manual Approach
 
 - One approach is to delegate the routes to controllers:
 ```javascript
   var MyRouter = Backbone.Router.extend({
     routes: {
-      "": "home",
-      "home": "home",
-      "product/:id": "viewProduct",
+      '': 'home',
+      'home': 'home',
+      'product/:id': 'viewProduct',
     },
 
     home: function() {
-      AppController.home();
+      myController.home();
     },
 
     viewProduct: function(productId) {
-      ProductController.viewProduct(productId);
+      myController.viewProduct(productId);
     }
   });
 ```
-- Derick Bailey factors out even those functions: [Reducing Backbone Routers To Nothing More Than Configuration](http://lostechies.com/derickbailey/2012/01/02/reducing-backbone-routers-to-nothing-more-than-configuration/)
+
+----
+
+## Marionette's AppRouter
+
+- *Marionette.AppRouter* binds the route methods to an external *Controller*:
+```javascript
+  var MyRouter = new Marionette.AppRouter({
+    controller: myController,
+    appRoutes: {
+      '': 'home',
+      'home': 'home',
+      'product/:id': 'viewProduct',
+    }
+  });
+```
+- Good practice: divide routes into smaller pieces of related functionality and have multiple routers / controllers, instead of just one giant router and controller.
 
 ---
 
@@ -455,9 +471,61 @@ Mar 25th, 2014
 
 ## Data binding
 
+- Backbone.js data binding is very primitive while other MV* frameworks (Ember.js, Knockout.js and AngularJS) excel on it.
+- This code re-renders the whole View for each Model's change:
+```javascript
+  var MyView = Backbone.View.extend({
+    initialize: function() {
+      this.model.on('change', this.render, this); // Data binding
+    },
+
+    render: function() { ... }
+  });
+```
+- Ideally, one attribute change on the Model should just re-render that attribute's representation on the DOM and not the whole View.
+
 ----
 
 ## Epoxy.js
+
+- *Epoxy.js* is a data binding library for Backbone.js based on Knockout.js and Ember.js, featuring:
+  - Computed Model & View Attributes
+  - Declarative View Bindings
+  - Automated Dependency Mapping
+  - Automatic View Updates
+- It connects each Model's attribute with a DOM element.
+- Can be used together with Marionette's views.
+- Can also compute results from the attributes's data.
+
+----
+
+## Epoxy.js
+
+```javascript
+  var bindModel = new Backbone.Model({
+    name: 'Tiago Garcia'
+  });
+
+  var BindingView = Backbone.Epoxy.View.extend({
+    el: '#my-form',
+    bindings: {
+      'input.name': 'value:name,events:["keyup"]', // Input
+      'span.name': 'text:name', // Output
+    }
+  });
+
+  var view = new BindingView({ model: bindModel });
+```
+
+```html
+  <!-- Plain HTML template -->
+  <div id="my-form">
+    <label>Name:</label>
+    <input type="text" class="name">
+
+    <span class="name"></span>
+  </div>
+```
 
 ---
 
@@ -485,6 +553,7 @@ Mar 25th, 2014
 1. [Developing Backbone.js Applications](http://addyosmani.github.io/backbone-fundamentals)
 1. [Marionette.js](https://github.com/marionettejs/backbone.marionette)
 1. [Reducing Backbone Routers To Nothing More Than Configuration](http://lostechies.com/derickbailey/2012/01/02/reducing-backbone-routers-to-nothing-more-than-configuration/)
+1. [Epoxy.js](http://epoxyjs.org)
 
 ---
 
