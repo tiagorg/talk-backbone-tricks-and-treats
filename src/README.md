@@ -21,24 +21,23 @@ You should just edit the source file at src/README.md - the one which stars with
 ## Agenda
 
  - The jQuery Way
- - Views and Memory leaks
- - Overwhelming the DOM
- - Nesting views
- - Application and Modules
- - Router vs Controller
- - Tight coupling
-   - Pub/sub
+ - Marionette.js
+   - Views and Memory leaks
+   - Overwhelming the DOM
+   - Nesting views
+   - Application and Modules
+   - Router vs Controller
+   - Cohesion
+   - Coupling
 
 ----
 
 ## Agenda
 
- - Callback hell
-   - Promises and deferring
  - Data binding
    - Epoxy.js
- - Slow tests
-   - Sinon.JS
+ - Mocking AJAX
+   - Sinon.js
 
 ---
 
@@ -46,7 +45,7 @@ You should just edit the source file at src/README.md - the one which stars with
 
 - Backbone.js
 - Design patterns for large-scale javascript
-- Jasmine
+- Curiosity
 
 ---
 
@@ -58,6 +57,20 @@ You should just edit the source file at src/README.md - the one which stars with
   - DOM events binding belongs to the View and *SHOULD NOT* be coded like *`$(el).click(...)`*.
 - This is a common scenario in code migrations to Backbone, but simple to fix. Just have the Models and Views to do their work.
 - Follow [Step by step from jQuery to Backbone](https://github.com/kjbekkelund/writings/blob/master/published/understanding-backbone.md) to better understand this process.
+
+---
+
+## Marionette.js
+
+<img src="img/marionette.png" class="marionette" />
+
+<ul class="full">
+  <li>A Backbone.js composite application library to <br/>provide structure for large-scale Javascript.</li>
+  <li>Includes good practices and design & <br/>implementation patterns.</li>
+  <li>Reduces code boilerplate.</li>
+  <li>Provides a modular architecture framework <br/>with a Pub/Sub implementation.</li>
+  <li>And much more...</li>
+</ul>
 
 ---
 
@@ -102,20 +115,6 @@ You should just edit the source file at src/README.md - the one which stars with
       $("#mainContent").html(this.currentView.el);
     }
 ```
-
-----
-
-## Marionette.js
-
-<img src="img/marionette.png" class="marionette" />
-
-<ul class="full">
-  <li>A Backbone.js composite application library to <br/>provide structure for large-scale Javascript.</li>
-  <li>Includes good practices and design & <br/>implementation patterns.</li>
-  <li>Reduces code boilerplate.</li>
-  <li>Provides a modular architecture framework <br/>with a Pub/Sub implementation.</li>
-  <li>And much more...</li>
-</ul>
 
 ----
 
@@ -337,7 +336,7 @@ You should just edit the source file at src/README.md - the one which stars with
 ## Marionette's Application
 
 - Can fire events on before, after and during initialization.
-- Contain *Marionette.Region*s for global layout organization.
+- Holds *Marionette.Region*s for global layout organization.
 - Can define, access, start and stop *Marionette.Modules*:
 ```javascript
   MyApp.module('myModule', function() { // Defining
@@ -345,9 +344,9 @@ You should just edit the source file at src/README.md - the one which stars with
 
     this.publicFunction = function() { // Public member
       return privateData;
-    }
+    };
 
-    Foo.addInitializer(function() { // Initializer
+    this.addInitializer(function() { // Initializer
       console.log(privateData);
     });
   });
@@ -395,10 +394,86 @@ You should just edit the source file at src/README.md - the one which stars with
 
 ---
 
+## Cohesion
+
+- Backbone.js provides Models, Collections, Views and Routers. It doesn't mean we can't use other components here.
+- Why should you write a complex interface logic (full of customized components) on the same file?
+- To achieve a good separation of concerns, factor small pieces of related code into *cohesive Modules*:
+```javascript
+  MyApp.module('vehicleFactory', function() {
+    this.createVehicle = function(wheels) {
+      switch (wheels) {
+        case 2: return new MotorcycleModel();
+        case 4: return new CarModel();
+        default: return new VehicleModel();
+      }
+    }
+  });
+```
+
+---
+
+## Coupling
+
+- Components can communicate with each other without heavy dependencies through a Pub/Sub.
+- Back in [Design Patterns for Large-Scale Javascript](http://slid.es/avenuecode/design-patterns-for-large-scale-javascript), a manual Pub/Sub implementation was proposed.
+- *Marionette.Application.vent* implements it too, acting as an *Event Aggregator*:
+```javascript
+  // Subscriber
+  MyApp.module('subscriber', function() {
+    function onTrigger() {
+      alert('triggered');
+    }
+
+    this.addInitializer(function() {
+      MyApp.vent.on('myEvent', onTrigger);
+    });
+  });
+```
+
+----
+
+
+## Coupling
+
+```javascript
+  // Publisher
+  MyApp.module('publisher', function() {
+    this.addInitializer(function() {
+      MyApp.vent.trigger('myEvent');
+    });
+  });
+
+  // Starting them up
+  $(function() {
+    MyApp.module('subscriber').start();
+    MyApp.module('publisher').start();
+  });
+```
+
+---
+
+## Data binding
+
+----
+
+## Epoxy.js
+
+---
+
+## Mocking AJAX
+
+----
+
+## Sinon.js
+
+---
+
 ## Conclusion
 
-- This talk template rocks!
-- Your life should be easier now.
+- Backbone.js is not a complete application structure framework, thus many details are left for the developer.
+- In order to avoid problems and keep up with the good practices, frameworks as Marionette.js and Epoxy.js are very handy.
+- Mocking AJAX with Sinon.js provides a solid way to test Backbone.js integration.
 
 ---
 
@@ -415,6 +490,7 @@ You should just edit the source file at src/README.md - the one which stars with
 
 ## Challenge
 
-1. Make your awesome talk based on this template.
-1. Push it to a gh-pages branch on your GitHub account.
-1. Share the URL with the world!
+1. Pick your *Quiz App* or come up with a brand new Backbone.js application which requires interaction with the user.
+1. Implement both *Marionette.js* and *Epoxy.js* on this project. Explore them well and use their features as much as possible.
+1. Evaluate the pros and cons of your solution regarding the adoption of such frameworks, in terms of code organization, verbosity, scalability and robustness.
+1. Send me your evaluation and the project in a GitHub repo.
