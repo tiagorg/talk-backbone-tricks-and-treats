@@ -14,30 +14,27 @@ Tiago Garcia @ [Avenue Code](http://www.avenuecode.com)
 
 *tgarcia@avenuecode.com*
 
-Mar 25th, 2014
+Mar 20th, 2014
 
 ---
 
 ## Agenda
 
  - The jQuery Way
- - Marionette.js
-   - Views and Memory leaks
-   - Overwhelming the DOM
-   - Nesting views
-   - Application and Modules
-   - Router vs Controller
-   - Cohesion
-   - Coupling
+ - Views and Memory leaks
+ - Overwhelming the DOM
+ - Nesting views
+ - Application and Modules
+ - Router vs Controller
+ - Cohesion
+ - Coupling
 
 ----
 
 ## Agenda
 
  - Data binding
-   - Epoxy.js
  - Mocking AJAX
-   - Sinon.JS
 
 ---
 
@@ -57,20 +54,6 @@ Mar 25th, 2014
   - DOM events binding belongs to the View and *SHOULD NOT* be coded like *`$(el).click(...)`*.
 - This is a common scenario in code migrations to Backbone, but simple to fix. Just have the Models and Views to do their work.
 - Follow [Step by step from jQuery to Backbone](https://github.com/kjbekkelund/writings/blob/master/published/understanding-backbone.md) to better understand this process.
-
----
-
-## Marionette.js
-
-<img src="img/marionette.png" class="marionette" />
-
-<ul class="full">
-  <li>A Backbone.js composite application library to <br/>provide structure for large-scale Javascript.</li>
-  <li>Includes good practices and design & <br/>implementation patterns.</li>
-  <li>Reduces code boilerplate.</li>
-  <li>Provides a modular architecture framework <br/>with a Pub/Sub implementation.</li>
-  <li>And much more...</li>
-</ul>
 
 ---
 
@@ -115,6 +98,20 @@ Mar 25th, 2014
       $('#mainContent').html(this.currentView.el);
     }
 ```
+
+----
+
+## Marionette.js
+
+<img src="img/marionette.png" class="marionette" />
+
+<ul class="full">
+  <li>A Backbone.js composite application library to <br/>provide structure for large-scale Javascript.</li>
+  <li>Includes good practices and design & <br/>implementation patterns.</li>
+  <li>Reduces code boilerplate.</li>
+  <li>Provides a modular architecture framework <br/>with a Pub/Sub implementation.</li>
+  <li>And much more...</li>
+</ul>
 
 ----
 
@@ -431,9 +428,9 @@ Mar 25th, 2014
 
 ## Coupling
 
-- Components can communicate with each other without heavy dependencies through a Pub/Sub.
+- Components depending on other components usually create unnecessary *tight coupling*, which can be greatly reduced using a Pub/Sub.
 - Back in [Design Patterns for Large-Scale Javascript](http://slid.es/avenuecode/design-patterns-for-large-scale-javascript), a manual Pub/Sub implementation was proposed.
-- *Marionette.Application.vent* implements it too, acting as an *Event Aggregator*:
+- *Marionette.Application.vent* also implements a Pub/Sub:
 ```javascript
   // Subscriber
   MyApp.module('subscriber', function() {
