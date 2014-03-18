@@ -314,6 +314,51 @@ You should just edit the source file at src/README.md - the one which stars with
 
 ---
 
+## Application and Modules
+
+- We all know how bad it is to create global vars, so we came up with *namespaces* in JS object structures.
+- Common practice: create a plain JS object that everything is attached to, which also initializes the Backbone application.
+- *Marionette.Application* does that and much more:
+```javascript
+  var MyApp = new Marionette.Application();
+
+  MyApp.addInitializer(function(options) {
+    new MyRouter(options.initialRoute);
+    Backbone.history.start();
+  });
+
+  MyApp.start({
+    initialRoute: 'home'
+  });
+```
+
+----
+
+## Marionette's Application
+
+- Can fire events on before, after and during initialization.
+- Contain *Marionette.Region*s for global layout organization.
+- Can define, access, start and stop *Marionette.Modules*:
+```javascript
+  MyApp.module('myModule', function() { // Defining
+    var privateData = "I'm private"; // Private member
+
+    this.publicFunction = function() { // Public member
+      return privateData;
+    }
+
+    Foo.addInitializer(function() { // Initializer
+      console.log(privateData);
+    });
+  });
+
+  var myModule = MyApp.module('myModule'); // Accessing
+  myModule.start(); // Starting
+  myModule.stop(); // Stopping
+```
+
+---
+
 ## Router vs Controller
 
 - Routers commonly violate the *Single Responsibility Principle* (SRP) when used to:
@@ -322,7 +367,7 @@ You should just edit the source file at src/README.md - the one which stars with
   - coordinate modules
 - A Router's main (and only) purpose is to define routes and delegate the flow to different parts of the application.
 - According to MVC, *Controllers* should deal with such things as Models, Collections, Views and Modules.
-- Even though Backbone.js is MV*, there is nothing wrong on creating Controllers just as any other JS module.
+- Even though Backbone.js is MV*, there is nothing wrong on creating Controllers just as any other Module.
 
 ----
 
