@@ -428,40 +428,44 @@ You should just edit the source file at src/README.md - the one which stars with
 
 ## Coupling
 
-- Components depending on other components usually create unnecessary *tight coupling*, which can be greatly reduced using a Pub/Sub.
-- Back in [Design Patterns for Large-Scale Javascript](http://slid.es/avenuecode/design-patterns-for-large-scale-javascript), a manual Pub/Sub implementation was proposed.
-- *Marionette.Application.vent* also implements a Pub/Sub:
+- Components depending on other components usually create unnecessary *tight coupling*, which can be greatly reduced using a Pub/Sub:
 ```javascript
-  // Subscriber
-  MyApp.module('subscriber', function() {
-    function onTrigger() {
-      alert('triggered');
+  var alerter = {         // Should be a Subscriber
+    sayIt: function() {
+      alert('May the force be with you.');
     }
-
-    this.addInitializer(function() {
-      MyApp.vent.on('myEvent', onTrigger);
-    });
-  });
+  };
+  var invoker = {         // Should be a Publisher
+    start: function() {
+      alerter.sayIt();
+    }
+  };
+  invoker.start();
 ```
+- Back in [Design Patterns for Large-Scale Javascript](http://slid.es/avenuecode/design-patterns-for-large-scale-javascript), a manual Pub/Sub implementation was proposed.
 
 ----
 
+## Marionette's Application.vent
 
-## Coupling
-
+- *Marionette.Application.vent* also implements a Pub/Sub:
 ```javascript
-  // Publisher
-  MyApp.module('publisher', function() {
+  MyApp.module('alerter', function() {   // Subscriber
     this.addInitializer(function() {
-      MyApp.vent.trigger('myEvent');
+      MyApp.vent.on('sayIt', function() {
+        alert('May the force be with you.');
+      });
     });
   });
 
-  // Starting them up
-  $(function() {
-    MyApp.module('subscriber').start();
-    MyApp.module('publisher').start();
+  MyApp.module('invoker', function() {    // Publisher
+    this.addInitializer(function() {
+      MyApp.vent.trigger('sayIt');
+    });
   });
+
+  MyApp.module('alerter').start();
+  MyApp.module('invoker').start();
 ```
 
 ---
