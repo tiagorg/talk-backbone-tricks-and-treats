@@ -18,6 +18,17 @@ Mar 20th, 2014
 
 ---
 
+## Tiago Garcia
+
+<img src="http://www.gravatar.com/avatar/5cac784a074b86d771fe768274f6860c?s=250" class="avatar">
+
+- Tech Manager at [Avenue Code](http://www.avenuecode.com) 
+- Tech Lead at [Macys.com](http://www.macys.com).
+- Organizer of the [Backbone.js Hackers meetup in SF](http://www.meetup.com/Backbone-js-Hackers).
+
+
+---
+
 ## Agenda
 
  - The jQuery Way
@@ -28,52 +39,67 @@ Mar 20th, 2014
  - Router vs Controller
  - Cohesion
  - Coupling
-
-----
-
-## Agenda
-
  - Data binding
- - Mocking AJAX
+ - Components
+ - Mocking async calls
 
 ---
 
 ## Prerequisites
 
-- Backbone.js
-- Design patterns for large-scale javascript
+- [Backbone.js](http://slides.com/avenuecode/boosting-the-client-side-with-backbone-js#/)
+- [Design patterns for large-scale javascript](http://slides.com/avenuecode/design-patterns-for-large-scale-javascript#/)
 - Curiosity
+- Opinion
+
+---
+
+## AJAX Rant
+
+- Think twice before saying AJAX ever again.
+- AJAX = *A*synchronous *J*avascript *A*nd *X*ML.
+- AJAJ = *A*synchronous *J*avascript *A*nd *J*SON.
+- It is hardly because of *XMLHttpRequest* object -> it can transfer in any format.
+- RESTful APIs became popular -> I don't quite see XML responses ever since.
+- XML lacks out-of-the-box support on MV* frameworks.
+- However, *AJAJ* doesn't sound as cool as *AJAX* so people prefer not using the proper term.
+- *ASYNC*, FTW! Who will join me?
+
+----
+
+## ASYNC
+
+<img src="img/async.jpg">
 
 ---
 
 ## The jQuery Way
 
-- Backbone depends on jQuery, but it shouldn't mean abusing.
-- Developers coming from strong jQuery background insist on *jQuerizing*, while Backbone provides structure to avoid that:
-  - AJAX belongs to the Model and *SHOULD NOT* be coded like *`$.ajax()`*.
-  - DOM events binding belongs to the View and *SHOULD NOT* be coded like *`$(el).click(...)`*.
-- This is a common scenario in code migrations to Backbone, but simple to fix. Just have the Models and Views to do their work.
-- Follow [Step by step from jQuery to Backbone](https://github.com/kjbekkelund/writings/blob/master/published/understanding-backbone.md) to better understand this process.
+- Backbone depends on jQuery\*, but *depending !== abusing*.
+- Newcomers tend to adopt jQuery-based solutions instead of taking advantage of Backbone.js structures:
+  - *Backbone.Model* takes care of async calls so they **SHOULDN'T** be coded like *`$.ajax()`*.
+  - *Backbone.View* takes care of DOM events binding so they **SHOULDN'T** be coded like *`$(el).click(...)`*.
+- A common scenario in code migrations to Backbone, but simple to fix. Just put Models and Views to do their work.
+- Follow [Step by step from jQuery to Backbone](https://github.com/kjbekkelund/writings/blob/master/published/understanding-backbone.md) to shed some light on this process.
 
 ---
 
 ## Views and Memory leaks
 
-- Backbone leaves much of the code structure for to the developer to define and implement.
+- Backbone leaves much of the code structure for the developer to define and implement.
 - Bad designs easily lead to memory leaks.
 ```javascript
   var MyView = Backbone.View.extend({
     initialize: function() {
-      this.model.on('change', this.render, this); // Data binding
+      this.model && this.model.on('change', this.render, this);
     },
-
     render: function() {
       alert('Rendering the view');
     }
   });
 ```
-- If instantiated twice, the 1st View will be never Garbage Collected, once model keeps a reference for it (*Zombie View*).
-- This can cause *side-effects* - alert box will appear twice.
+- *MyView* gets instantiated twice: 1st will never be Garbage Collected, as the model holds its reference -> *Zombie View*.
+- This can cause *side effects* -> alert box will appear twice.
 
 ----
 
@@ -86,16 +112,14 @@ Mar 20th, 2014
       this.stopListening();
     }
 ```
-- However, we must remember to manually call this method whenever we destroy a View.
+- However, we must remember to manually call this method whenever we destroy a *MyView* instance.
 - Good practice: use a *Manager* to maintain the current View:
 ```javascript
     showView: function(view) {
-      if (this.currentView) {
-        this.currentView.close();
-      }
+      this.currentView && this.currentView.close();
       this.currentView = view;
       this.currentView.render();
-      $('#mainContent').html(this.currentView.el);
+      $('#content').html(this.currentView.el);
     }
 ```
 
@@ -103,7 +127,7 @@ Mar 20th, 2014
 
 ## Marionette.js
 
-<img src="img/marionette.png" class="marionette" />
+<img src="img/marionette.png" class="icon" />
 
 <ul class="full">
   <li>A Backbone.js composite application library to <br/>provide structure for large-scale Javascript.</li>
@@ -119,12 +143,10 @@ Mar 20th, 2014
 
 - *Marionette.ItemView* extends *Backbone.View* and automates the rendering of a single item (Model or Collection).
 - It implements *render()* for you, applying a given *template* to a Model/Collection.
-- Using *listenTo()* instead of *on()* for binding events, you no longer need to manually invoke a *close* method.
+- By using *listenTo()* instead of *on()* for binding events, you no longer need to manually invoke a *close* method.
 ```javascript
   var MyView = Marionette.ItemView.extend({
     template: '#my-ujs-template', // Underscore.js template
-    template: Handlebars.compile($('#my-hbs-template').html()), // Handlebars.js template
-
     initialize: function() {
       this.listenTo(this.model, 'change', this.render);
     }
@@ -138,24 +160,24 @@ Mar 20th, 2014
 ## Marionette's Region
 
 - *Marionette.Region* is a Views container and manager.
-- It manages their lifecycles and proper display on a DOM element and closing (no more Zombie Views).
+- It properly displays Views on the DOM and disposes them -> no more Zombie Views.
 ```javascript
     var myRegion = new Marionette.Region({
       el: '#content'
     });
 
     var view1 = new MyView({ /* ... */ });
-    myRegion.show(view1); // myRegion yields view and populates the DOM
+    myRegion.show(view1); // renders view1 and appends to #content
 
     var view2 = new MyView({ /* ... */ });
-    myRegion.show(view2); // myRegion yields view and populates the DOM
+    myRegion.show(view2); // disposes view1, renders/append view2
 ```
 
 ---
 
 ## Overwhelming the DOM
 
-- In a View which renders a Collection, we normally use a child View for each item and append it to the parent, like:
+- In a View which renders a Collection, we normally render a child View for each item and append them to the parent:
 ```javascript
     var CollectionView = Backbone.View.extend({
       render: function() {
@@ -169,7 +191,7 @@ Mar 20th, 2014
       }
     });
 ```
-- If the Collection has N items, this code makes N operations on the DOM, which is *expensive*. Imagine N = 1000?
+- Say the Collection has N items, this code will make N appends, which is *expensive*. What if N = 1000?
 
 
 ----
@@ -229,7 +251,7 @@ Mar 20th, 2014
 
 ## Nesting views
 
-- Usual view nesting:
+- Common view nesting:
 ```javascript
   var OuterView = Backbone.View.extend({
     render: function() {
@@ -285,7 +307,7 @@ Mar 20th, 2014
     }
   });
 ```
-- This still can be a mess for too many inner views.
+- This can easily get messy for multiple inner views.
 
 ----
 
@@ -312,9 +334,9 @@ Mar 20th, 2014
 
 ## Application and Modules
 
-- We all know how bad it is to create global vars, so we came up with *namespaces* in JS object structures.
-- Common practice: create a plain JS object that everything is attached to, which also initializes the Backbone application.
-- *Marionette.Application* does that and much more:
+- Global vars are evil. Nesting global vars (*namespaces*) is a common alternative, but it can easily get slow/messy.
+- Non-AMD applications usually have a global var to represent the app, hold the declarations and initialize it.
+- Introducing *Marionette.Application*, without nesting:
 ```javascript
   var MyApp = new Marionette.Application();
 
@@ -337,9 +359,8 @@ Mar 20th, 2014
 - Can define, access, start and stop *Marionette.Modules*:
 ```javascript
   MyApp.module('myModule', function() { // Defining
-    var privateData = 'I am private'; // Private member
-
-    this.publicFunction = function() { // Public member
+    var privateData = 'I am private'; // Private var
+    this.publicFunction = function() { // Public method
       return privateData;
     };
 
@@ -446,38 +467,39 @@ Mar 20th, 2014
 
 ----
 
-## Marionette's Application.vent
+## Backbone.Radio
 
-- *Marionette.Application.vent* also implements a Pub/Sub:
+- [Backbone.Radio](https://github.com/marionettejs/backbone.radio) also implements a Pub/Sub:
 ```javascript
   MyApp.module('alerter', function() {   // Subscriber
     this.addInitializer(function() {
-      MyApp.vent.on('sayIt', function() {
+      Backbone.Radio.channel('alerter').on('sayIt', function() {
         alert('May the force be with you.');
       });
     });
   });
 
-  MyApp.module('invoker', function() {    // Publisher
+  MyApp.module('invoker', function() {   // Publisher
     this.addInitializer(function() {
-      MyApp.vent.trigger('sayIt');
+      Backbone.Radio.channel('alerter').trigger('sayIt');
     });
   });
 
   MyApp.module('alerter').start();
   MyApp.module('invoker').start();
 ```
+- This will be replacing *Backbone.Wreqr* on Marionette.js.
 
 ---
 
 ## Data binding
 
-- Backbone.js data binding is very primitive while other MV* frameworks (Ember.js, Knockout.js and AngularJS) excel on it.
+- Backbone.js data binding is primitive while other MV* frameworks (Ember.js, Knockout.js, AngularJS) excel on it.
 - This code re-renders the whole View for each Model's change:
 ```javascript
   var MyView = Backbone.View.extend({
     initialize: function() {
-      this.model.on('change', this.render, this); // Data binding
+      this.model && this.model.on('change', this.render, this); 
     },
 
     render: function() { ... }
@@ -489,11 +511,14 @@ Mar 20th, 2014
 
 ## Epoxy.js
 
-- *Epoxy.js* is a data binding library for Backbone.js based on Knockout.js and Ember.js, featuring:
-  - Computed Model & View Attributes
+<img src="img/epoxy.png" class="icon" />
+
+- *Epoxy.js* is a data binding library for<br/>
+Backbone.js based on Knockout.js<br/>
+and Ember.js, featuring:
   - Declarative View Bindings
-  - Automated Dependency Mapping
   - Automatic View Updates
+  - Computed Model & View Attributes
 - It connects each Model's attribute with a DOM element.
 - Can be used together with Marionette's views.
 - Can also compute results from the attributes's data.
@@ -501,6 +526,15 @@ Mar 20th, 2014
 ----
 
 ## Epoxy.js
+
+```html
+  <!-- Plain HTML template -->
+  <div id="my-form">
+    <label>Name:</label>
+    <input type="text" class="name">
+    <span class="name"></span>
+  </div>
+```
 
 ```javascript
   var bindModel = new Backbone.Model({
@@ -518,31 +552,72 @@ Mar 20th, 2014
   var view = new BindingView({ model: bindModel });
 ```
 
-```html
-  <!-- Plain HTML template -->
-  <div id="my-form">
-    <label>Name:</label>
-    <input type="text" class="name">
+---
 
-    <span class="name"></span>
-  </div>
+## Components
+
+- Views reusability for real? Think components.
+- *Web Components* spec is right around the corner.
+- *React* is a View framework about:
+<img src="img/react.png" class="icon" />
+  - Components! (abstraction & composition)
+  - Elements (DOM) vs. Templates (strings)
+  - Virtual DOM 
+  - Reactive data flow (or *ReactLink* for Two-way)
+  - Bonus: works on the server-side!
+- *React* can replace the whole *Backbone.View* layer.
+- It just takes a mixin to be integrated with Backbone, or something as [react.backbone](https://github.com/clayallsopp/react.backbone).
+
+----
+
+## React.js
+
+```javascript
+  var bindModel = new Backbone.Model({
+    name: 'Lando Calrissian'
+  });
+
+  var BindingView = React.createBackboneClass({
+    render: function() {
+      return (
+        React.DOM.span( 
+          { className: 'name' }, this.getModel().get('name')
+        )
+      );
+    }
+  });
+
+  React.renderComponent(
+    BindingView({ model: bindModel }), document.getElementById('my-form')
+  );
 ```
 
 ---
 
-## Mocking AJAX
+## Benchmark
 
-- How to unit test Backbone Models that consume data from a server?
-- If we really use a server, this might get slow depending on the number of requests. And the server must work at all times, cause if it isn't working the tests will probably fail.
-- If we use mocks, we don't depend on a server, however we need some code to feed the Model with mocks and hence we are not testing it perfectly (just like in Production).
-- How does it sound to replace the browser AJAX with a fake AJAX powered with mocks?
+- <a href="http://jsfiddle.net/tiagorg/5L9qxnsq/" target="_blank">JSFiddle</a>
+- Yes, structure and data binding have a price....
+- ...so as the chaos of not having them!
+
+---
+
+## Mocking async calls
+
+- How to unit test Models that consume data from a server?
+- Using a real server can be slow. The server must also be up at all times, otherwise the tests will probably fail.
+- Using *data mocks* frees us from server dependency. 
+- However, it deviates from the way the Model will actually be used in Production, which creates challenges for testing.
+- What about replacing the browser async mechanism with a *mock-powered proxy*?
 
 ----
 
 ## Sinon.JS
 
-- Provides test spies, stubs and mocks for JavaScript.
-- Works with any unit testing framework and also standalone.
+<img src="img/sinon.png" class="icon" />
+
+- Test spies, stubs and mocks for async.
+- Framework-agnostic.
 ```javascript
   var server = sinon.fakeServer.create();
   server.autoRespond = true;
@@ -560,14 +635,17 @@ Mar 20th, 2014
     ]
   );
 ```
+- Goes well with [Leche](https://github.com/box/leche) for mock creation.
 
 ---
 
 ## Conclusion
 
 - Backbone.js is not a complete application structure framework, thus many details are left for the developer.
-- In order to avoid problems and keep up with the good practices, frameworks as Marionette.js and Epoxy.js are very handy.
-- Mocking AJAX with Sinon.JS provides a solid way to test Backbone.js integration.
+- In order to avoid problems and keep up with the good practices, *Marionette.js* comes very handy.
+- Data binding can be made easy with *Epoxy.js*.
+- *React.js* can greatly componentize your View layer.
+- Mocking async calls with *Sinon.JS* provides a solid way to test Backbone.js integration.
 
 ---
 
@@ -575,18 +653,29 @@ Mar 20th, 2014
 
 1. [Structuring jQuery with Backbone.js](http://www.codemag.com/Article/1312061)
 1. [Step by step from jQuery to Backbone](https://github.com/kjbekkelund/writings/blob/master/published/understanding-backbone.md)
-1. [Zombies! RUN! (Managing Page Transitions In Backbone Apps)](http://lostechies.com/derickbailey/2011/09/15/zombies-run-managing-page-transitions-in-backbone-apps/)
+1. [Zombies! RUN! (Managing Page Transitions In Backbone)](http://lostechies.com/derickbailey/2011/09/15/zombies-run-managing-page-transitions-in-backbone-apps/)
 1. [Developing Backbone.js Applications](http://addyosmani.github.io/backbone-fundamentals)
 1. [Marionette.js](https://github.com/marionettejs/backbone.marionette)
 1. [Reducing Backbone Routers To Nothing More Than Configuration](http://lostechies.com/derickbailey/2012/01/02/reducing-backbone-routers-to-nothing-more-than-configuration/)
+1. [Backbone.Radio](https://github.com/marionettejs/backbone.radio)
 1. [Epoxy.js](http://epoxyjs.org)
+1. [React](http://facebook.github.io/react/)
 1. [Sinon.JS](http://sinonjs.org)
+1. [Leche](https://github.com/box/leche)
+
+---
+
+## Meetups
+
+1. [Backbone.js Hackers](http://www.meetup.com/Backbone-js-Hackers/) - San Francisco
+1. [Dancing with Marionette](http://www.meetup.com/Dancing-with-Marionette-js/) - New York
+1. [ReactJS](http://www.meetup.com/ReactJS-San-Francisco/) - San Francisco
 
 ---
 
 ## Challenge
 
-1. Pick your *Quiz App* or come up with a brand new Backbone.js application which requires interaction with the user.
-1. Implement both *Marionette.js* and *Epoxy.js* on this project. Explore them well and use their features as much as possible.
+1. Fork my [Quiz App](https://github.com/tiagorg/quiz-app) or come up with a brand new Backbone.js application which requires interaction with the user.
+1. Use *Marionette.js* and either *React.js* or *Epoxy.js*. Explore them well and use their features as much as possible.
 1. Evaluate the pros and cons of your solution regarding the adoption of such frameworks, in terms of code organization, verbosity, scalability and robustness.
-1. Send me your evaluation and the project in a GitHub repo.
+1. Send me your analysis and project in a GitHub repo.

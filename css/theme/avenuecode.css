@@ -1,9 +1,9 @@
-@import url(https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic);
 /**
  * Default theme for reveal.js.
  *
  * Copyright (C) 2011-2012 Hakim El Hattab, http://hakim.se
  */
+@import url(https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic);
 @font-face {
   font-family: 'Quicksand';
   font-style: normal;
@@ -168,10 +168,18 @@ body {
     .reveal.center .slides section img.logo {
       max-height: 250px;
       border: 0; }
+    .reveal.center .slides section pre {
+      min-width: 800px; }
+    .reveal.center .slides section img.avatar {
+      -webkit-border-radius: 10px;
+      -moz-border-radius: 10px;
+      border-radius: 10px;
+      border: 2px solid black; }
     .reveal.center .slides section ul.full {
       width: 100%; }
-    .reveal.center .slides section img.marionette {
+    .reveal.center .slides section img.icon {
       max-height: 250px;
+      max-width: 250px;
       border: 0;
       background: none;
       position: absolute;

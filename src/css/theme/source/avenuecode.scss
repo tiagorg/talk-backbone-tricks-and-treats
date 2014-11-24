@@ -65,12 +65,24 @@ $heading1TextShadow: 0 1px 0 #ccc, 0 2px 0 #c9c9c9, 0 3px 0 #bbb, 0 4px 0 #b9b9b
         border: 0;
       }
 
+      pre {
+        min-width: 800px;
+      }
+
+      img.avatar {
+        -webkit-border-radius: 10px;
+        -moz-border-radius: 10px;
+        border-radius: 10px;
+        border: 2px solid black;
+      }
+
       ul.full {
         width: 100%;
       }
 
-      img.marionette {
+      img.icon {
         max-height: 250px;
+        max-width: 250px;
         border: 0;
         background: none;
         position: absolute;
